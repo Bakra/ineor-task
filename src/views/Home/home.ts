@@ -1,5 +1,5 @@
-
 import { Component, Vue } from 'vue-property-decorator'
+/* eslint-disable */
 
 @Component
 export default class Home extends Vue {
@@ -26,85 +26,104 @@ export default class Home extends Vue {
   }
 
   CalculateSerivePrice () {
-    if (this.selectedService) {
-      const getService = this.service.find(obj => obj.id === this.selectedService)
-      this.price = getService.price
+    if (this.$data.selectedService) {
+      const getService = this.$data.service.find((obj: any) => obj.id === this.$data.selectedService)
+      this.$data.price = getService.price
     }
   }
 
   async getAppointment () {
-    const getAppointments = await fetch(this.baseURL + '/appointments')
-    debugger
-    this.appointments = await getAppointments.json()
+    const getAppointments = await fetch(this.$data.baseURL + '/appointments')
+    this.$data.appointments = await getAppointments.json()
   }
 
-  async HandleSubmit (e) {
+  async HandleSubmit (e: any) {
     e.preventDefault()
-    const error = document.getElementsByClassName('error')
+    const error: any = document.getElementsByClassName('error')
     if (error.length > 0) {
-      error.forEach(item => {
+      error.forEach((item: any) => {
         item.style.display = 'none'
         return null
       })
     }
     let submit = true
-    if (!this.fname) {
+    if (!this.$data.fname) {
       const fname = document.getElementById('fname')
-      fname.style.display = 'block'
+      if (fname) {
+        fname.style.display = 'block'
+        submit = false
+      }
+    }
+    if (!this.$data.lname) {
+      const fname = document.getElementById('fname')
+      if (fname) {
+        fname.style.display = 'block'
+      }
       submit = false
     }
-    if (!this.lname) {
-      const fname = document.getElementById('fname')
-      fname.style.display = 'block'
-      submit = false
-    }
-    if (!this.email) {
+    if (!this.$data.email) {
       const email = document.getElementById('email')
-      email.style.display = 'block'
+      if (email) {
+        email.style.display = 'block'
+      }
       submit = false
     }
     if (!this.validEmail()) {
       const email = document.getElementById('email')
-      email.style.display = 'block'
+      if (email) {
+        email.style.display = 'block'
+      }
       submit = false
     }
-    if (!this.phone) {
+    if (!this.$data.phone) {
       const phone = document.getElementById('phone')
-      phone.style.display = 'block'
+      if (phone) {
+        phone.style.display = 'block'
+      }
       submit = false
     }
-    if (!this.selectedBarber) {
+    if (!this.$data.selectedBarber) {
       const barber = document.getElementById('barber')
-      barber.style.display = 'block'
+      if (barber) {
+        barber.style.display = 'block'
+      }
       submit = false
     }
-    if (!this.selectedService) {
+    if (!this.$data.selectedService) {
       const service = document.getElementById('service')
-      service.style.display = 'block'
+      if (service) {
+        service.style.display = 'block'
+      }
       submit = false
     }
-    if (!this.date) {
+    if (!this.$data.date) {
       const date = document.getElementById('date')
-      date.style.display = 'block'
+      if (date) {
+        date.style.display = 'block'
+      }
       submit = false
     }
-    if (!this.time) {
+    if (!this.$data.time) {
       const time = document.getElementById('time')
-      time.style.display = 'block'
+      if (time) {
+        time.style.display = 'block'
+      }
       submit = false
     }
-    const selectedDateTime = Date.parse(this.date + ' ' + this.time)
+    const selectedDateTime = Date.parse(this.$data.date + ' ' + this.$data.time)
     if (selectedDateTime < new Date().getTime()) {
       const other = document.getElementById('other')
-      other.textContent = 'Appointment time should be greater then current time'
-      other.style.display = 'block'
+      if (other) {
+        other.textContent = 'Appointment time should be greater then current time'
+        other.style.display = 'block'
+      }
       submit = false
     }
     if (submit) {
       await this.getAppointment()
-      const barber = await this.barber.find(obj => obj.id === this.selectedBarber)
+      const barber = await this.$data.barber.find((obj: any) => obj.id === this.$data.selectedBarber)
       const selectedDateObj = new Date(selectedDateTime)
-      const workingHours = await barber.workHours.filter(item => item.day === selectedDateObj.getDay())
+      const workingHours = await barber.workHours.filter((item: any) => item.day === selectedDateObj.getDay())
       let message = ''
       if (workingHours.length > 0) {
         const workday = workingHours[0]
@@ -120,10 +139,10 @@ export default class Home extends Vue {
             submit = false
           }
         } else {
-          const checkAppointment = await this.appointments.filter(item => {
+          const checkAppointment = await this.$data.appointments.filter((item: any) => {
             const itemObj = new Date(item.startDate)
             if ((itemObj.getDate() === selectedDateObj.getDate()) && (itemObj.getHours() === selectedDateObj.getHours())) {
-              const getService = this.service.find(serviceitem => serviceitem.id === item.serviceId)
+              const getService = this.$data.service.find((serviceitem: any) => serviceitem.id === item.serviceId)
               const itemStartTime = item.startDate
               const endTime = item.startDate + (getService.durationMinutes * 60 * 1000)
               return ((selectedDateTime >= itemStartTime) && (endTime >= selectedDateTime))
@@ -140,14 +159,14 @@ export default class Home extends Vue {
         submit = false
       }
       if (submit) {
-        const id = this.appointments[this.appointments.length - 1].id + 1
+        const id = this.$data.appointments[this.$data.appointments.length - 1].id + 1
         const data = {
-          barberId: this.selectedBarber,
+          barberId: this.$data.selectedBarber,
           id: id,
-          serviceId: this.selectedService,
+          serviceId: this.$data.selectedService,
           startDate: selectedDateTime
         }
-        const submitAppointment = await fetch(this.baseURL + '/appointments', {
+        const submitAppointment = await fetch(this.$data.baseURL + '/appointments', {
           method: 'post',
           headers: {
             Accept: 'application/json',
@@ -162,22 +181,25 @@ export default class Home extends Vue {
         this.getAppointment()
       } else {
         const other = document.getElementById('other')
-        other.textContent = message
-        other.style.display = 'block'
+        if (other) {
+          other.textContent = message
+          other.style.display = 'block'
+        }
       }
     }
   }
 
   validEmail () {
     const re = /^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}$/
-    return re.test(this.email)
+    return re.test(this.$data.email)
   }
 
   async mounted () {
-    const response = await fetch(this.baseURL + '/barbers')
-    this.barber = await response.json()
-    const getService = await fetch(this.baseURL + '/services')
-    this.service = await getService.json()
+    const response = await fetch(this.$data.baseURL + '/barbers')
+    this.$data.barber = await response.json()
+    const getService = await fetch(this.$data.baseURL + '/services')
+    const service = await getService.json()
+    this.$data.service = service
     await this.getAppointment()
   }
 }
